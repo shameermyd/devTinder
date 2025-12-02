@@ -3,13 +3,12 @@ const {adminAuth,userAuth} = require("./middlewares/auth.js")
 const app = express();
 
 app.use("/admin",adminAuth);
-app.use("/user",userAuth);
 
 app.get("/admin/profile",(req,res)=>{
     res.send({ auth:"admin", firstName: "Muhammed", lastName: "Shameer" });
 });
 
-app.get("/user/profile",(req,res)=>{
+app.get("/user/profile",userAuth,(req,res)=>{
     res.send({ auth:"user", firstName: "Muhammed", lastName: "Shameer" });
 });
 
