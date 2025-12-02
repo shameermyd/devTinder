@@ -1,27 +1,17 @@
 const express = require("express");
-
+const {adminAuth,userAuth} = require("./middlewares/auth.js")
 const app = express();
 
-app.get("/user",(req,res)=>{
-    res.send({ firstName: "Muhammed", lastName: "Shameer" })
-})
+app.use("/admin",adminAuth);
+app.use("/user",userAuth);
 
-app.get("/user/:userId", (req,res)=>{
-    res.send(req.params);
+app.get("/admin/profile",(req,res)=>{
+    res.send({ auth:"admin", firstName: "Muhammed", lastName: "Shameer" });
 });
 
-app.post("/user",(req,res)=>{
-    res.send("Data added Successfully Saved")
-})
-
-app.delete("/user",(req,res)=>{
-    res.send("Deleted Successfully ")
-})
-
-app.use("/user",(req,res)=>{
-    res.send("Hello from server")
-})
-
+app.get("/user/profile",(req,res)=>{
+    res.send({ auth:"user", firstName: "Muhammed", lastName: "Shameer" });
+});
 
 app.listen(3333,()=>{
     console.log("server port: 3333 running...");
