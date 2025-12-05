@@ -1,9 +1,17 @@
 //page: app.js
 const express = require("express");
-require("./config/database.js")
+const { connectDB } = require("./config/database.js");
 const app = express();
 
 
-app.listen(3333,()=>{
-    console.log("server port: 3333 running...");
-});
+connectDB()
+    .then(() => {
+        console.log("DB Connected Success ✅");
+        app.listen(3333, () => {
+            console.log("server port: 3333 running...🚀");
+        });
+    })
+    .catch((err) => {
+        console.log("DB Failed to Connect ❌");
+    });
+
