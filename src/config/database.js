@@ -5,7 +5,7 @@ const connectDB = async () => {
     try {
         await mongoose.connect("mongodb+srv://shameermyd:shameer007@shameerCluster.08t6wgy.mongodb.net/devTinder");
     } catch (error) {
-        console.log(error,"Connection Error!");
+        console.log(error,"Connection Error ‼️");
     }
 };
 

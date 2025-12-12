@@ -22,13 +22,13 @@ app.get("/user",async (req,res)=>{
     try {
         const user = await User.find({emailId: req.body.emailId});
         if(user.length === 0){
-            res.status(400).send("Email is not found!")
+            res.status(400).send("Email is not found ‼️")
         }else{
             res.send(user)
         }
         
     } catch (error) {
-        res.status(400).send("Something went wrong!!");
+        res.status(400).send("Something went wrong ‼️");
     }
     
 });
@@ -37,12 +37,12 @@ app.get("/feed",async(req,res)=>{
     try {
         const users = await User.find({});
         if(users.length === 0){
-            res.status(400).send("No user Found!!")
+            res.status(400).send("No user Found ‼️")
         }else{
             res.send(users)
         }
     } catch (error) {
-        res.status(400).send("Something went wrong!!")
+        res.status(400).send("Something went wrong ‼️")
     }
 });
 
@@ -51,24 +51,27 @@ app.delete("/user",async(req,res)=>{
     try {
         console.log(userId);
         const user = await User.findByIdAndDelete(userId);
-        res.send("User Deleted Successfully!!")
+        res.send("User Deleted Successfully ✅")
     } catch (error) {
-        res.status(400).send("Something Went Wrong!!")
+        res.status(400).send("Something Went Wrong ‼️")
     }
 })
 
 app.patch("/user",async(req,res)=>{
     const userId = req.body.userId;
-    const data = req.body;
-    console.log(data);
-    console.log(userId);
-    
+    const { userId: _, ...data } = req.body;
+    console.log(data,'====req body');
+    console.log(userId, '====userId');
     
     try {
-        const user = User.findByIdAndUpdate({_id: userId},data);
-        res.send("Updated Successfully..")
+        const user = await User.findByIdAndUpdate(userId, data, { new: true, runValidators: true });
+        if(!user){
+            res.status(400).send("User Not Found!!")
+        } else {
+            res.send("Updated Successfully..✅")
+        }
     } catch (error) {
-        res.status(400).send("Something Went Wrong!!")
+        res.status(400).send("Something Went Wrong ‼️")
     }
 })
 
@@ -77,7 +80,7 @@ connectDB()
     .then(() => {
         console.log("DB Connected Success ✅");
         app.listen(3333, () => {
-            console.log("server port: 3333 running...🚀");
+            console.log("server port: 3333 running...⏳🚀");
         });
     })
     .catch((err) => {
