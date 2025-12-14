@@ -18,27 +18,27 @@ app.post("/signUp", async (req, res) => {
 
 });
 
-app.get("/user",async (req,res)=>{
+app.get("/user", async (req, res) => {
     try {
-        const user = await User.find({emailId: req.body.emailId});
-        if(user.length === 0){
+        const user = await User.find({ emailId: req.body.emailId });
+        if (user.length === 0) {
             res.status(400).send("Email is not found ‼️")
-        }else{
+        } else {
             res.send(user)
         }
-        
+
     } catch (error) {
         res.status(400).send("Something went wrong ‼️");
     }
-    
+
 });
 //all users
-app.get("/feed",async(req,res)=>{
+app.get("/feed", async (req, res) => {
     try {
         const users = await User.find({});
-        if(users.length === 0){
+        if (users.length === 0) {
             res.status(400).send("No user Found ‼️")
-        }else{
+        } else {
             res.send(users)
         }
     } catch (error) {
@@ -46,7 +46,7 @@ app.get("/feed",async(req,res)=>{
     }
 });
 
-app.delete("/user",async(req,res)=>{
+app.delete("/user", async (req, res) => {
     const userId = req.body.userId;
     try {
         console.log(userId);
@@ -57,21 +57,29 @@ app.delete("/user",async(req,res)=>{
     }
 })
 
-app.patch("/user",async(req,res)=>{
+app.patch("/user", async (req, res) => {
     const userId = req.body.userId;
-    const { userId: _, ...data } = req.body;
-    console.log(data,'====req body');
-    console.log(userId, '====userId');
-    
+    const data = req.body;
+
     try {
+        const ALLOWED_TO_UPDATES = ["userId", "age", "photoUrl", "gender", "skills", "about"];
+        const isUpdateAllowed = Object.keys(data).every((key) => ALLOWED_TO_UPDATES.includes(key));
+
+        if (!isUpdateAllowed) {
+            throw new Error("Fields Don't allowed to Update")
+        }
+
+        if(data.skills.length > 5){
+            throw new Error("Less than 5 Skills Allowed to Add");
+        }
         const user = await User.findByIdAndUpdate(userId, data, { new: true, runValidators: true });
-        if(!user){
+        if (!user) {
             res.status(400).send("User Not Found!!")
         } else {
             res.send("Updated Successfully..✅")
         }
     } catch (error) {
-        res.status(400).send("Something Went Wrong ‼️")
+        res.status(400).send("‼️ UPDATED FAILED : "+ error.message)
     }
 })
 

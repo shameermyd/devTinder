@@ -32,6 +32,13 @@ const userSchema = mongoose.Schema({
             }
         }
     },
+    skills:{
+        type: [String]
+    },
+    about:{
+        type: String,
+        default: "Default from userSchema"
+    }
 }, { timestamps: true, }
 );
 
