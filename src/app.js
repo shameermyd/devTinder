@@ -57,8 +57,9 @@ app.delete("/user", async (req, res) => {
     }
 })
 
-app.patch("/user", async (req, res) => {
-    const userId = req.body.userId;
+app.patch("/user/:userId", async (req, res) => {
+    // const userId = req.body.userId;
+    const userId = req.params?.userId
     const data = req.body;
 
     try {
