@@ -1,15 +1,21 @@
 //page: app.js
 const express = require("express");
 const { connectDB } = require("./config/database");
-const User = require("./models/user")
+const User = require("./models/user");
+const { validateSignUpData } = require("./utils/validation")
+
 const app = express();
 
 app.use(express.json());
 
 app.post("/signUp", async (req, res) => {
-    const user = new User(req.body);
 
     try {
+        //Validation of Data
+        validateSignUpData(req);
+
+        const user = new User(req.body);
+
         await user.save();
         res.send("User Data Added Successfully ✅")
     } catch (err) {
@@ -70,7 +76,7 @@ app.patch("/user/:userId", async (req, res) => {
             throw new Error("Fields Don't allowed to Update")
         }
 
-        if(data.skills.length > 5){
+        if (data.skills.length > 5) {
             throw new Error("Less than 5 Skills Allowed to Add");
         }
         const user = await User.findByIdAndUpdate(userId, data, { new: true, runValidators: true });
@@ -80,7 +86,7 @@ app.patch("/user/:userId", async (req, res) => {
             res.send("Updated Successfully..✅")
         }
     } catch (error) {
-        res.status(400).send("‼️ UPDATED FAILED : "+ error.message)
+        res.status(400).send("‼️ UPDATED FAILED : " + error.message)
     }
 })
 
