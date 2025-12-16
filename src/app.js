@@ -3,10 +3,13 @@ const express = require("express");
 const { connectDB } = require("./config/database");
 const User = require("./models/user");
 const { validateSignUpData } = require("./utils/validation")
+const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken")
 
 const app = express();
-
 app.use(express.json());
+app.use(cookieParser());
 
 app.post("/signUp", async (req, res) => {
 
@@ -14,7 +17,16 @@ app.post("/signUp", async (req, res) => {
         //Validation of Data
         validateSignUpData(req);
 
-        const user = new User(req.body);
+        //Encryption password
+        const { firstName, lastName, emailId, password } = req.body;
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        const user = new User({
+            firstName,
+            lastName,
+            emailId,
+            password: passwordHash
+        });
 
         await user.save();
         res.send("User Data Added Successfully ✅")
@@ -23,6 +35,53 @@ app.post("/signUp", async (req, res) => {
     }
 
 });
+
+app.post("/login", async (req, res) => {
+
+    try {
+        const { emailId, password } = req.body;
+
+        const user = await User.findOne({ emailId: emailId });
+        console.log(user);
+
+        if (!user) {
+            throw new Error("Invalid Credentials (username / password)!!");
+        }
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if(isPasswordValid){
+
+            const token = await jwt.sign({_id:user._id},"SHAMEER@25");
+            console.log(token,'====decodeMessage');
+
+            res.cookie("token",token); //cookie creation
+            res.send("Login Successfully !!!");
+        }else{
+            throw new Error("Invalid Credentials (password / username)!!");
+        }
+    } catch (error) {
+        res.status(400).send("ERROR ‼️ : " + error.message);
+    }
+
+});
+
+app.get("/profile",async (req,res)=>{
+    try {
+        const cookies = req.cookies; //cookie reading
+        const {token} = cookies;
+
+        const decodeMessage = await jwt.verify(token,"SHAMEER@25");
+        const {_id} = decodeMessage;
+
+        const userData = await User.findById({_id});
+        if(!userData) {
+            throw new Error("User does not Exist!!")
+        }
+        res.send(userData);
+    } catch (error) {
+        res.status(400).send("User not Found!!");
+    }
+})
 
 app.get("/user", async (req, res) => {
     try {
