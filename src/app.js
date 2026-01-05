@@ -2,7 +2,6 @@
 const express = require("express");
 const { connectDB } = require("./config/database");
 const User = require("./models/user");
-const { validateSignUpData } = require("./utils/validation")
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
@@ -12,78 +11,13 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-app.post("/signUp", async (req, res) => {
+const authRouter = require("./routes/auth");
+const profileRouter = require("./routes/profile");
+const requestRouter = require("./routes/request");
 
-    try {
-        //Validation of Data
-        validateSignUpData(req);
-
-        //Encryption password
-        const { firstName, lastName, emailId, password } = req.body;
-        const passwordHash = await bcrypt.hash(password, 10);
-
-        const user = new User({
-            firstName,
-            lastName,
-            emailId,
-            password: passwordHash
-        });
-
-        await user.save();
-        res.send("User Data Added Successfully ✅")
-    } catch (err) {
-        res.status(400).send("Failed to Save: ‼️" + err.message);
-    }
-
-});
-
-app.post("/login", async (req, res) => {
-
-    try {
-        const { emailId, password } = req.body;
-
-        const user = await User.findOne({ emailId: emailId });
-        console.log(user);
-
-        if (!user) {
-            throw new Error("Invalid Credentials (username / password)!!");
-        }
-        const isPasswordValid = await user.validatePassword(password); //bcrypt.compare(password, user.password)
-
-        if(isPasswordValid){
-
-            const token = await user.getJWT(); //schema methods
-
-            res.cookie("token",token,{expires: new Date(Date.now() + 1 * 3600000)}); //cookie creation
-            res.send("Login Successfully !!!");
-        }else{
-            throw new Error("Invalid Credentials (password / username)!!");
-        }
-    } catch (error) {
-        res.status(400).send("ERROR ‼️ : " + error.message);
-    }
-
-});
-
-app.get("/profile",userAuth,async (req,res)=>{
-    try {
-        
-        const userData = req.user;
-        res.send(userData);
-    } catch (error) {
-        res.status(400).send("User not Found!!");
-    }
-})
-
-app.get("/sendConnection", userAuth ,async (req, res) => {
-    try {
-        const user = req.user;
-        res.send(user.firstName + "🤜🏻 sending Connection Request!!");
-    } catch (error) {
-        res.status(400).send("Something went wrong ‼️");
-    }
-
-});
+app.use('/', authRouter);
+app.use('/', profileRouter);
+app.use('/', requestRouter);
 
 
 app.get("/user", async (req, res) => {
